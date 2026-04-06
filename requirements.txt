@@ -1,0 +1,20 @@
+# Airflow (core + extras)
+apache-airflow[celery,jdbc,redis]>=2.8.4,<3.0
+apache-airflow-providers-apache-spark>=4.7.0
+apache-airflow-providers-jdbc>=4.2.0
+
+# PySpark + Delta Lake
+pyspark>=3.4.0,<3.6
+delta-spark>=3.0.0,<4.0
+
+# Azure ADLS Gen2
+azure-storage-file-datalake>=12.14.0
+azure-identity>=1.15.0
+
+# Config / env
+pyyaml>=6.0
+python-dotenv>=1.0.0
+
+# Testing
+pytest>=7.4.0
+pytest-mock>=3.12.0

@@ -1,6 +1,6 @@
 # airflow-spark-pipeline
 
-Batch data pipeline for **logistics delivery events**, orchestrated with Apache Airflow 2.x and processed with PySpark 3.x. Raw delivery events are ingested from a relational source, transformed into analytics-ready facts, and aggregated into daily metrics — all stored as Delta Lake tables on Azure ADLS Gen2.
+Batch data pipeline for **logistics delivery events**, orchestrated with Apache Airflow 2.x and processed with PySpark 3.x. Raw delivery events are ingested from a relational source, transformed into analytics-ready facts, and aggregated into daily metrics, all stored as Delta Lake tables on Azure ADLS Gen2.
 
 ---
 
@@ -18,7 +18,7 @@ Batch data pipeline for **logistics delivery events**, orchestrated with Apache 
 │                     logistics_daily_pipeline DAG                        │
 │                                                                         │
 │  [check_source_availability]                                            │
-│          │  PythonOperator — verifies JDBC connectivity                 │
+│          │  PythonOperator: verifies JDBC connectivity                 │
 │          ▼                                                              │
 │  [ingest_delivery_events]                                               │
 │          │  SparkSubmitOperator → spark_jobs/ingest_deliveries.py       │
@@ -33,7 +33,7 @@ Batch data pipeline for **logistics delivery events**, orchestrated with Apache 
 │          │  Courier-level KPIs, writes to AGGREGATED layer              │
 │          ▼                                                              │
 │  [notify_completion]                                                    │
-│          PythonOperator — logs pipeline summary                         │
+│          PythonOperator: logs pipeline summary                         │
 └──────────────────────────────┬──────────────────────────────────────────┘
                                │
                                ▼
@@ -66,7 +66,7 @@ Delivery events originate from mobile courier apps and IoT devices, where the sa
 
 The curated layer uses a **Delta Lake MERGE** statement keyed on `event_id`:
 
-- **WHEN MATCHED** (same `event_id` already exists in the target): update all columns with the incoming record. This handles late-arriving corrections — e.g. a status code corrected after manual review.
+- **WHEN MATCHED** (same `event_id` already exists in the target): update all columns with the incoming record. This handles late-arriving corrections: e.g. a status code corrected after manual review.
 - **WHEN NOT MATCHED**: insert the new row.
 
 This makes every pipeline run **idempotent**: re-running for the same date produces exactly the same result, which is essential for safe backfills and retry logic.
@@ -212,7 +212,7 @@ pip install -r requirements.txt
 pytest tests/ -v
 ```
 
-Tests use a local `SparkSession(master="local[1]")` — no cluster required.
+Tests use a local `SparkSession(master="local[1]")`, no cluster required.
 
 ---
 

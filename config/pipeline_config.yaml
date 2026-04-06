@@ -1,0 +1,49 @@
+# Pipeline configuration for logistics delivery events pipeline
+# All durations are strings accepted by Delta Lake / Spark.
+
+spark:
+  master: "yarn"                    # Override with local[*] for dev
+  executor_memory: "4g"
+  driver_memory: "2g"
+  executor_cores: 2
+  num_executors: 4
+  shuffle_partitions: 200
+  delta_log_retention: "30 days"
+  delta_deleted_file_retention: "7 days"
+  dynamic_allocation_enabled: true
+  dynamic_allocation_min_executors: 1
+  dynamic_allocation_max_executors: 8
+
+azure:
+  storage_account: "${AZURE_STORAGE_ACCOUNT}"
+  container: "datalake"
+  base_path: "logistics"
+  # Full ABFS prefix: abfss://<container>@<account>.dfs.core.windows.net/<base_path>
+
+pipeline:
+  lookback_days: 3               # Watermark lookback window for safe re-ingestion
+  batch_size: 100000             # Max rows per JDBC fetch partition
+  watermark_table: "pipeline_watermarks"
+  sla_hours: 48                  # On-time delivery threshold
+  late_reasons:
+    no_pickup: ["NP001", "NP002"]
+    courier_delay: ["CD001", "CD002", "CD003"]
+    address_issue: ["AI001", "AI002", "AI003", "AI004"]
+
+paths:
+  raw_layer: "abfss://datalake@{storage_account}.dfs.core.windows.net/logistics/raw/delivery_events"
+  curated_layer: "abfss://datalake@{storage_account}.dfs.core.windows.net/logistics/curated/delivery_facts"
+  aggregated_layer: "abfss://datalake@{storage_account}.dfs.core.windows.net/logistics/aggregated/daily_metrics"
+  watermark_path: "abfss://datalake@{storage_account}.dfs.core.windows.net/logistics/meta/watermarks"
+
+jdbc:
+  fetch_size: 10000
+  num_partitions: 8
+  partition_column: "event_id"
+  source_table: "delivery_events"
+
+notification:
+  email_on_failure: true
+  email_on_retry: false
+  recipients:
+    - "data-team@example.com"
